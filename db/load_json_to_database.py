@@ -26,7 +26,7 @@ _IMAGE_URL_KEY = 'image_main'
 LOG = logging.getLogger(__name__)
 
 
-def load_file(filename):
+def load_json_data(filename):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with open(f'{dir_path}/{filename}', 'r') as f:
         text = f.readlines()
@@ -58,12 +58,13 @@ def get_number_in_minutes_from_text(text):
     return int(sum(numbers) / len(numbers))
 
 
-def save_meal_ingredients(ingredient_segment, meal_ingredients)
+def save_meal_ingredients(ingredient_segment, meal_ingredients):
     for meal_ingredient in meal_ingredients:
         ingredient = MealIngredient.objects.create(
             ingredient_and_amount_text=meal_ingredient,
             ingredient_segment=ingredient_segment)
         ingredient.save()
+
 
 def save_ingredient_segments(ingredient_segments, recipe):
     for segment in ingredient_segments:
@@ -92,12 +93,14 @@ def save_chefs(chefs, recipe):
         chef_o.recipe_set.add(recipe)
         recipe.chefs.add(chef_o)
 
+
 def extract_ingredient_name(url_text):
     segments = url_text.split('/')
     name = segments[-1]
     name = name.replace('_', ' ')
 
     return name
+
 
 def save_ingredients(recipe, ingredients):
     for ingredient_url in ingredients:
@@ -116,12 +119,14 @@ def save_ingredients(recipe, ingredients):
         recipe.ingredients.add(ingredient)
         ingredient.recipe_set.add(recipe)
 
+
 def save_image(image, recipe):
     description = image.get(_IMAGE_DESCRIPTION_KEY)
     url = image.get(_IMAGE_URL_KEY)
 
     img = Image.objects.create(url=url, description=description, recipe=recipe)
     img.save()
+
 
 def save_recipe(recipe_dict: dict):
     prep_time_text = recipe_dict.get(_PREP_TIME_KEY)
@@ -156,16 +161,14 @@ def save_recipe(recipe_dict: dict):
     if image is not None:
         save_image(image, recipe)
 
-
     recipe.save()
 
 
-
-def load_recipes(recipes_list):
+def save_recipes(recipes_list):
     for recipe in recipes_list:
         save_recipe(recipe)
 
 
 if __name__ == '__main__':
-    file = load_file('parsed_recipes.json')
-
+    data = load_json_data('parsed_recipes.json')
+    save_recipes(data)
