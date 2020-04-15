@@ -2,3 +2,5 @@ django
 pytest
 psycopg2-binary
 graphene-django
+djangorestframework-jwt
+djangorestframework
