@@ -107,3 +107,5 @@ config.env
 *.csr
 *.key
 *.pem
+
+.env.*

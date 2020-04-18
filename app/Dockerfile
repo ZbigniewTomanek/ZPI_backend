@@ -3,7 +3,6 @@ FROM python:3.8.0-alpine
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN mkdir /usr/src/app
 WORKDIR /usr/src/app
 
 # install psycopg2 dependencies
@@ -22,5 +21,4 @@ COPY . /usr/src/app/
 COPY ./entrypoint.sh /usr/src/app/entrypoint.sh
 
 # run entrypoint.sh
-RUN chmod u+x /usr/src/app/entrypoint.sh
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

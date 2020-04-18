@@ -1,6 +1,6 @@
 import json
 import os
-from backend.models import *
+from app.backend.models import *
 import logging
 
 _PREP_TIME_KEY = 'prep_time'
