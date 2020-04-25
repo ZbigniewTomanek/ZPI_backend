@@ -108,4 +108,5 @@ config.env
 *.key
 *.pem
 
-.env.*
+# .env.*
+*.sqlite3

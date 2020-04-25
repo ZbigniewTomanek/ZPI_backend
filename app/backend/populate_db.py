@@ -2,6 +2,7 @@ import json
 import os
 from .models import *
 import logging
+from tqdm import tqdm
 
 _PREP_TIME_KEY = 'prep_time'
 _COOK_TIME_KEY = 'cook_time'
@@ -52,7 +53,6 @@ def get_number_in_minutes_from_text(text):
         return None
 
     if any([number < 10 for number in numbers]):
-        print('here')
         numbers = [number * 60 for number in numbers] # convert to minutes
 
     return int(sum(numbers) / len(numbers))
@@ -140,8 +140,8 @@ def save_recipe(recipe_dict: dict):
 
     recipe = Recipe.objects.create(preparation_time_text=prep_time,
                                    preparation_time=prep_time,
-                                   cook_time_text=cook_time_text,
-                                   cook_time=cook_time,
+                                   cooking_time_text=cook_time_text,
+                                   cooking_time=cook_time,
                                    url=recipe_url,
                                    description=recipe_description)
 
@@ -165,11 +165,21 @@ def save_recipe(recipe_dict: dict):
 
 
 def save_recipes(recipes_list):
-    for recipe in recipes_list:
+    for recipe in tqdm(recipes_list):
         save_recipe(recipe)
 
 
+def delete_all(all_models):
+    for model in all_models:
+        for obj in model.objects.all():
+            obj.delete()
+
+
 def exe():
+    LOG.info('Deleting all previous data')
+    delete_all([Image, Chef, MealIngredient, IngredientsSegment, Ingredient, Recipe])
+
+    LOG.info('Loading recipes from json')
     data = load_json_data('parsed_recipes.json')
     save_recipes(data)
 
