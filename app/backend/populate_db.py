@@ -1,6 +1,6 @@
 import json
 import os
-from app.backend.models import *
+from .models import *
 import logging
 
 _PREP_TIME_KEY = 'prep_time'
@@ -169,6 +169,10 @@ def save_recipes(recipes_list):
         save_recipe(recipe)
 
 
-if __name__ == '__main__':
+def exe():
     data = load_json_data('parsed_recipes.json')
     save_recipes(data)
+
+
+if __name__ == '__main__':
+    exe()
