@@ -147,7 +147,7 @@ STATIC_URL = "/staticfiles/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 GRAPHENE = {
-    'SCHEMA': 'backend.schema.schema'
+    'SCHEMA': 'recipes_rest.schema.schema'
 }
 
 REST_FRAMEWORK = {
