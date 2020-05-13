@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Chef(models.Model):
@@ -64,5 +65,15 @@ class Image(models.Model):
     def __str__(self):
         return f'Image nr {self.id}, {self.url}'
 
+
+class RecipesUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    liked_ingredients = models.ManyToManyField(Ingredient, related_name='%(class)s_liked_ingredient')
+    disliked_ingredients = models.ManyToManyField(Ingredient, related_name='%(class)s_disliked_ingredient')
+    saved_recipes = models.ManyToManyField(Recipe)
+
+    def __str__(self):
+        return str(self.user)
 
 

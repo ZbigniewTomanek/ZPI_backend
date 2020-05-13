@@ -1,9 +1,13 @@
 import graphene
-import backend.schema as schema
+import backend.schema as backend_schema
 
 
-class Query(schema.Query, graphene.ObjectType):
+class Query(backend_schema.Query, graphene.ObjectType):
     pass
 
 
-schema = graphene.Schema(query=Query)
+class Mutation(backend_schema.Mutation, graphene.ObjectType):
+    pass
+
+
+schema = graphene.Schema(query=Query, mutation=Mutation)

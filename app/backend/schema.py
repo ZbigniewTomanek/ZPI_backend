@@ -1,6 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 from .models import *
+from django.contrib.auth.models import User
 
 
 class IngredientType(DjangoObjectType):
@@ -33,6 +34,116 @@ class ImageType(DjangoObjectType):
         model = Image
 
 
+class ClassicUserType(DjangoObjectType):
+    class Meta:
+        model = User
+
+
+class UserType(DjangoObjectType):
+    user = graphene.Field(ClassicUserType)
+
+    class Meta:
+        model = RecipesUser
+
+
+class CreateUser(graphene.Mutation):
+    class Arguments:
+        password = graphene.String()
+        username = graphene.String()
+        email = graphene.String()
+
+    ok = graphene.Boolean()
+    user = graphene.Field(UserType)
+
+    def mutate(self, info, username, email, password):
+        user = User.objects.create_user(username=username, email=email, password=password)
+        recipes_user = RecipesUser.objects.create(user=user)
+
+        ok = True
+
+        return CreateUser(user=recipes_user, ok=ok)
+
+
+class AddLikedIngredient(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.Int()
+        ingredient_id = graphene.Int()
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, user_id, ingredient_id):
+        ingredient = Ingredient.objects.get(id=ingredient_id)
+        user = RecipesUser.objects.get(id=user_id)
+
+        user.liked_ingredients.add(ingredient)
+
+        ok = True
+
+        return AddLikedIngredient(ok=ok)
+
+
+class AddDislikedIngredient(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.Int()
+        ingredient_id = graphene.Int()
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, user_id, ingredient_id):
+        ingredient = Ingredient.objects.get(id=ingredient_id)
+        user = RecipesUser.objects.get(id=user_id)
+
+        user.disliked_ingredients.add(ingredient)
+
+        ok = True
+
+        return AddDislikedIngredient(ok=ok)
+
+
+class SaveUserRecipe(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.Int()
+        recipe_id = graphene.Int()
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, user_id, recipe_id):
+        user = RecipesUser.objects.get(id=user_id)
+        recipe = Recipe.objects.get(id=recipe_id)
+
+        user.saved_recipes.add(recipe)
+
+        ok = True
+
+        return SaveUserRecipe(ok=ok)
+
+
+class RemoveUserRecipe(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.Int()
+        recipe_id = graphene.Int()
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, user_id, recipe_id):
+        user = RecipesUser.objects.get(id=user_id)
+        recipe = Recipe.objects.get(id=recipe_id)
+
+        user.saved_recipes.remove(recipe)
+
+        ok = True
+
+        return RemoveUserRecipe(ok=ok)
+
+
+class Mutation(graphene.ObjectType):
+    create_user = CreateUser.Field()
+    add_liked_ingredient = AddLikedIngredient.Field()
+    add_disliked_ingredient = AddDislikedIngredient.Field()
+    save_user_recipe = SaveUserRecipe.Field()
+    remove_user_recipe = RemoveUserRecipe.Field()
+
+
 class Query(object):
     all_ingredients = graphene.List(IngredientType)
     ingredient = graphene.Field(IngredientType,
@@ -59,6 +170,10 @@ class Query(object):
     all_images = graphene.List(ImageType)
     image = graphene.Field(ImageType,
                            id=graphene.Int(), )
+
+    all_users = graphene.List(UserType)
+    user = graphene.Field(UserType,
+                          id=graphene.Int())
 
     def resolve_all_ingredients(self, info, **kwargs):
         return Ingredient.objects.all()
@@ -135,5 +250,20 @@ class Query(object):
 
         if id is not None:
             return Image.objects.get(pk=id)
+
+        return None
+
+    def resolve_all_users(self, info, **kwargs):
+        return RecipesUser.objects.select_related('user').all()
+
+    def resolve_user(self, info, **kwargs):
+        id = kwargs.get('id')
+        username = kwargs.get('username')
+
+        if id is not None:
+            return RecipesUser.objects.get(pk=id)
+
+        if username is not None:
+            return RecipesUser.objects.get(user__username=username)
 
         return None

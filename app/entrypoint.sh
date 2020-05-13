@@ -12,7 +12,9 @@ then
 fi
 
 python manage.py collectstatic --no-input --clear
-echo "from backend.populate_db import init_system; init_system()" | python manage.py shell
+python manage makemigrations backend
 python manage.py migrate
+echo "from backend.populate_db import init_system; init_system()" | python manage.py shell
+
 
 exec "$@"
