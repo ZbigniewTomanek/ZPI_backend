@@ -1,5 +1,5 @@
 import json
-import os
+import io
 from .models import *
 import logging
 from tqdm import tqdm
@@ -27,6 +27,24 @@ _IMAGE_DESCRIPTION_KEY = 'image_alt_text'
 _IMAGE_URL_KEY = 'image_main'
 
 LOG = logging.getLogger(__name__)
+
+
+class TqdmToLogger(io.StringIO):
+    """
+        Output stream for TQDM which will output to logger module instead of
+        the StdOut.
+    """
+    logger = None
+    level = None
+    buf = ''
+    def __init__(self,logger,level=None):
+        super(TqdmToLogger, self).__init__()
+        self.logger = logger
+        self.level = level or logging.INFO
+    def write(self,buf):
+        self.buf = buf.strip('\r\n\t ')
+    def flush(self):
+        self.logger.log(self.level, self.buf)
 
 
 def load_json_data(filename):
@@ -84,10 +102,10 @@ def save_chefs(chefs, recipe):
         url = chef.get(_CHEF_LINK_KEY)
 
         if Chef.objects.filter(name=name).exists():
-            LOG.info(f'{chef} is already in db')
+            LOG.debug(f'{chef} is already in db')
             return
         else:
-            LOG.info(f'Adding {chef} to db')
+            LOG.debug(f'Adding {chef} to db')
 
         chef_o = Chef.objects.create(name=name, url=url)
         chef_o.save()
@@ -109,10 +127,10 @@ def save_ingredients(recipe, ingredients):
         ingredient_qs = Ingredient.objects.filter(url=ingredient_url)
 
         if ingredient_qs.exists():
-            LOG.info(f'{ingredient_url} is already in database')
+            LOG.debug(f'{ingredient_url} is already in database')
             return
         else:
-            LOG.info(f'Putting {ingredient_url} to database')
+            LOG.debug(f'Putting {ingredient_url} to database')
 
         name = extract_ingredient_name(ingredient_url)
         ingredient = Ingredient.objects.create(url=ingredient_url, name=name)
@@ -167,7 +185,9 @@ def save_recipe(recipe_dict: dict):
 
 
 def save_recipes(recipes_list):
-    for recipe in tqdm(recipes_list):
+    tqdm_out = TqdmToLogger(LOG, level=logging.INFO)
+
+    for recipe in tqdm(recipes_list, file=tqdm_out):
         save_recipe(recipe)
 
 
@@ -182,7 +202,6 @@ def init_system():
     email = os.environ['EMAIL']
     password = os.environ['PASSWORD']
 
-    print('chuj')
 
     try:
         User.objects.get(username=username)

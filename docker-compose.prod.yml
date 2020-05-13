@@ -5,6 +5,7 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile.prod
+    image: warpig69/recipes-backend
     command: gunicorn recipes_rest.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - static_volume:/home/app/web/staticfiles
@@ -26,6 +27,7 @@ services:
       - testnetwork
 
   nginx:
+    image: warpig69/nginx
     build: ./nginx
     ports:
       - 1337:80
@@ -39,3 +41,7 @@ services:
 volumes:
   postgres_data:
   static_volume:
+
+networks:
+  testnetwork:
+    external: true
