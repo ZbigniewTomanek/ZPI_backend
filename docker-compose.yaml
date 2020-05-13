@@ -9,6 +9,8 @@ services:
       - POSTGRES_USER=hello_django
       - POSTGRES_PASSWORD=hello_django
       - POSTGRES_DB=hello_django_dev
+    networks:
+      - testnetwork
   web:
     image: warpig69/recipes-backend
     build: ./app
@@ -19,6 +21,12 @@ services:
       - ./.env.dev
     ports:
       - "8000:8000"
+    networks:
+      - testnetwork
 
 volumes:
   postgres_data:
+
+networks:
+  testnetwork:
+    external: true
