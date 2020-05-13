@@ -3,6 +3,8 @@ import os
 from .models import *
 import logging
 from tqdm import tqdm
+from django.contrib.auth.models import User
+import os
 
 _PREP_TIME_KEY = 'prep_time'
 _COOK_TIME_KEY = 'cook_time'
@@ -175,14 +177,34 @@ def delete_all(all_models):
             obj.delete()
 
 
-def exe():
-    LOG.info('Deleting all previous data')
-    delete_all([Image, Chef, MealIngredient, IngredientsSegment, Ingredient, Recipe])
+def init_system():
+    username = os.environ['USERNAME']
+    email = os.environ['EMAIL']
+    password = os.environ['PASSWORD']
 
-    LOG.info('Loading recipes from json')
-    data = load_json_data('parsed_recipes.json')
-    save_recipes(data)
+    print('chuj')
+
+    try:
+        User.objects.get(username=username)
+        LOG.info('Superuser found')
+    except:
+        LOG.info('Creating superuser')
+        User.objects.create_superuser(username, email, password)
+
+    if Recipe.objects.all().count() == 0:
+        LOG.info('DB is empty, starting populating it with recipes')
+
+        LOG.info('Deleting all previous data')
+        delete_all([Image, Chef, MealIngredient, IngredientsSegment, Ingredient, Recipe])
+
+        LOG.info('Loading recipes from json')
+        data = load_json_data('parsed_recipes.json')
+        save_recipes(data)
+    else:
+        LOG.info("recipes are already loaded")
 
 
-if __name__ == '__main__':
-    exe()
+
+
+
+

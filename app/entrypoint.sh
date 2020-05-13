@@ -11,7 +11,8 @@ then
     echo "PostgreSQL started"
 fi
 
-python manage.py migrate
 python manage.py collectstatic --no-input --clear
+echo "from backend.populate_db import init_system; init_system()" | python manage.py shell
+python manage.py migrate
 
 exec "$@"
