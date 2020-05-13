@@ -50,8 +50,7 @@ class IngredientsSegment(models.Model):
 
 class MealIngredient(models.Model):
     ingredient_and_amount_text = models.CharField(max_length=300)
-    ingredient_segment = models.\
-        ignKey(IngredientsSegment, on_delete=models.CASCADE)
+    ingredient_segment = models.ForeignKey(IngredientsSegment, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'Meal ingredient nr {self.id}, {self.ingredient_and_amount_text}'
