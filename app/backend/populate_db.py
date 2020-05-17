@@ -37,12 +37,15 @@ class TqdmToLogger(io.StringIO):
     logger = None
     level = None
     buf = ''
-    def __init__(self,logger,level=None):
+
+    def __init__(self, logger, level=None):
         super(TqdmToLogger, self).__init__()
         self.logger = logger
         self.level = level or logging.INFO
-    def write(self,buf):
+
+    def write(self, buf):
         self.buf = buf.strip('\r\n\t ')
+
     def flush(self):
         self.logger.log(self.level, self.buf)
 
@@ -73,7 +76,7 @@ def get_number_in_minutes_from_text(text):
         return None
 
     if any([number < 10 for number in numbers]):
-        numbers = [number * 60 for number in numbers] # convert to minutes
+        numbers = [number * 60 for number in numbers]  # convert to minutes
 
     return int(sum(numbers) / len(numbers))
 
@@ -148,6 +151,17 @@ def save_image(image, recipe):
     img.save()
 
 
+def parse_url_to_title(url):
+    url_list = url.split('/')
+    name = url_list[-1]
+    name = name.split('_')
+    name = name[:-1]
+
+    name = ' '.join(name)
+
+    return name.capitalize()
+
+
 def save_recipe(recipe_dict: dict):
     prep_time_text = recipe_dict.get(_PREP_TIME_KEY)
     cook_time_text = recipe_dict.get(_COOK_TIME_KEY)
@@ -157,8 +171,10 @@ def save_recipe(recipe_dict: dict):
 
     recipe_url = recipe_dict[_RECIPE_URL_KEY]
     recipe_description = recipe_dict.get(_RECIPE_DESCRIPTION_KEY)
+    recipe_title = parse_url_to_title(recipe_url)
 
-    recipe = Recipe.objects.create(preparation_time_text=prep_time,
+    recipe = Recipe.objects.create(title=recipe_title,
+                                   preparation_time_text=prep_time,
                                    preparation_time=prep_time,
                                    cooking_time_text=cook_time_text,
                                    cooking_time=cook_time,
@@ -202,7 +218,6 @@ def init_system():
     email = os.environ['EMAIL']
     password = os.environ['PASSWORD']
 
-
     try:
         User.objects.get(username=username)
         LOG.info('Superuser found')
@@ -221,9 +236,3 @@ def init_system():
         save_recipes(data)
     else:
         LOG.info("recipes are already loaded")
-
-
-
-
-
-

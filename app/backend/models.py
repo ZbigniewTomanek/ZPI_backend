@@ -22,6 +22,7 @@ class Recipe(models.Model):
     """
     time is stored in minutes
     """
+    title = models.CharField(max_length=300)
     url = models.CharField(max_length=500)
 
     preparation_time = models.IntegerField(null=True)
