@@ -11,6 +11,7 @@ then
     echo "PostgreSQL started"
 fi
 
+rm -f backend/migrations/*
 python manage.py collectstatic --no-input --clear
 python manage.py makemigrations backend
 python manage.py migrate
