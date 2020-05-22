@@ -10,6 +10,8 @@ _PREP_TIME_KEY = 'prep_time'
 _COOK_TIME_KEY = 'cook_time'
 _RECIPE_URL_KEY = 'recipe_url'
 _RECIPE_DESCRIPTION_KEY = 'recipe_description'
+_RECIPE_TITLE_KEY = 'title'
+_RECIPE_SERVINGS_KEY = 'recipe_serving'
 
 _INGREDIENTS_SEGMENT_KEY = 'ingredient_segments'
 _INGREDIENTS_SEGMENT_TITLE_KEY = 'title'
@@ -151,17 +153,6 @@ def save_image(image, recipe):
     img.save()
 
 
-def parse_url_to_title(url):
-    url_list = url.split('/')
-    name = url_list[-1]
-    name = name.split('_')
-    name = name[:-1]
-
-    name = ' '.join(name)
-
-    return name.capitalize()
-
-
 def save_recipe(recipe_dict: dict):
     prep_time_text = recipe_dict.get(_PREP_TIME_KEY)
     cook_time_text = recipe_dict.get(_COOK_TIME_KEY)
@@ -169,11 +160,13 @@ def save_recipe(recipe_dict: dict):
     prep_time = get_number_in_minutes_from_text(prep_time_text)
     cook_time = get_number_in_minutes_from_text(cook_time_text)
 
-    recipe_url = recipe_dict[_RECIPE_URL_KEY]
+    recipe_url = recipe_dict.get(_RECIPE_URL_KEY)
     recipe_description = recipe_dict.get(_RECIPE_DESCRIPTION_KEY)
-    recipe_title = parse_url_to_title(recipe_url)
+    recipe_title = recipe_dict.get(_RECIPE_TITLE_KEY)
+    recipe_servings = recipe_dict.get(_RECIPE_SERVINGS_KEY)
 
     recipe = Recipe.objects.create(title=recipe_title,
+                                   servings=recipe_servings,
                                    preparation_time_text=prep_time,
                                    preparation_time=prep_time,
                                    cooking_time_text=cook_time_text,
