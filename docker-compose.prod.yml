@@ -30,7 +30,7 @@ services:
     image: warpig69/nginx
     build: ./nginx
     ports:
-      - 1337:80
+      - 80:80
     volumes:
       - static_volume:/home/app/web/staticfiles
     depends_on:
