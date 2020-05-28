@@ -2,6 +2,7 @@ import graphene
 from graphene_django import DjangoObjectType
 from .models import *
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 class IngredientType(DjangoObjectType):
@@ -171,12 +172,29 @@ class Query(object):
     image = graphene.Field(ImageType,
                            id=graphene.Int(), )
 
-    all_users = graphene.List(UserType)
-    user = graphene.Field(UserType,
-                          id=graphene.Int())
+    @staticmethod
+    def __resolve_query(self, queryset, search, first, skip):
+        if search:
+            _filter = (
+                    Q(url__icontains=search) |
+                    Q(description__icontains=search)
+            )
+            queryset = queryset.filter(_filter)
 
-    def resolve_all_ingredients(self, info, **kwargs):
-        return Ingredient.objects.all()
+        if skip:
+            qs = queryset[skip:]
+
+        if first:
+            qs = queryset[:first]
+
+        return qs
+
+
+
+    def resolve_all_ingredients(self, info, search=None, first=None, skip=None, **kwargs):
+        qs = Ingredient.objects.all()
+        return self.__resolve_query(qs, search, first, skip)
+
 
     def resolve_ingredient(self, info, **kwargs):
         id = kwargs.get('id')
@@ -190,8 +208,9 @@ class Query(object):
 
         return None
 
-    def resolve_all_recipes(self, info, **kwargs):
-        return Recipe.objects.all()
+    def resolve_all_recipes(self, info, search=None, first=None, skip=None, **kwargs):
+        qs = Recipe.objects.all()
+        return self.__resolve_query(qs, search, first, skip)
 
     def resolve_recipe(self, info, **kwargs):
         id = kwargs.get('id')
@@ -205,8 +224,9 @@ class Query(object):
 
         return None
 
-    def resolve_all_chefs(self, info, **kwargs):
-        return Chef.objects.all()
+    def resolve_all_chefs(self, info, search=None, first=None, skip=None, **kwargs):
+        qs = Chef.objects.all()
+        return self.__resolve_query(qs, search, first, skip)
 
     def resolve_chef(self, info, **kwargs):
         id = kwargs.get('id')
@@ -220,8 +240,9 @@ class Query(object):
 
         return None
 
-    def resolve_all_ingredients_segements(self, info, **kwargs):
-        return IngredientsSegment.objects.select_related('recipe').all()
+    def resolve_all_ingredients_segements(self, info, search=None, first=None, skip=None, **kwargs):
+        qs = IngredientsSegment.objects.select_related('recipe').all()
+        return self.__resolve_query(qs, search, first, skip)
 
     def resolve_ingredients_segemnt(self, info, **kwargs):
         id = kwargs.get('id')
@@ -231,8 +252,9 @@ class Query(object):
 
         return None
 
-    def resolve_all_meal_ingredients(self, info, **kwargs):
-        return MealIngredient.objects.select_related('ingredient_segment').all()
+    def resolve_all_meal_ingredients(self, info, search=None, first=None, skip=None, **kwargs):
+        qs = MealIngredient.objects.select_related('ingredient_segment').all()
+        return self.__resolve_query(qs, search, first, skip)
 
     def resolve_meal_ingredient(self, info, **kwargs):
         id = kwargs.get('id')
@@ -242,8 +264,9 @@ class Query(object):
 
         return None
 
-    def resolve_all_images(self, info, **kwargs):
-        return Image.objects.select_related('recipe').all()
+    def resolve_all_images(self, info, search=None, first=None, skip=None, **kwargs):
+        qs = Image.objects.all()
+        return self.__resolve_query(qs, search, first, skip)
 
     def resolve_image(self, info, **kwargs):
         id = kwargs.get('id')
@@ -253,17 +276,3 @@ class Query(object):
 
         return None
 
-    def resolve_all_users(self, info, **kwargs):
-        return RecipesUser.objects.select_related('user').all()
-
-    def resolve_user(self, info, **kwargs):
-        id = kwargs.get('id')
-        username = kwargs.get('username')
-
-        if id is not None:
-            return RecipesUser.objects.get(pk=id)
-
-        if username is not None:
-            return RecipesUser.objects.get(user__username=username)
-
-        return None

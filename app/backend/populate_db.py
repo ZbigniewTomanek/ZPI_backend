@@ -145,12 +145,14 @@ def save_ingredients(recipe, ingredients):
         ingredient.recipe_set.add(recipe)
 
 
-def save_image(image, recipe):
+def save_image(image):
     description = image.get(_IMAGE_DESCRIPTION_KEY)
     url = image.get(_IMAGE_URL_KEY)
 
-    img = Image.objects.create(url=url, description=description, recipe=recipe)
+    img = Image.objects.create(url=url, description=description)
     img.save()
+
+    return image
 
 
 def save_recipe(recipe_dict: dict):
@@ -165,7 +167,12 @@ def save_recipe(recipe_dict: dict):
     recipe_title = recipe_dict.get(_RECIPE_TITLE_KEY)
     recipe_servings = recipe_dict.get(_RECIPE_SERVINGS_KEY)
 
+    image = recipe_dict.get(_IMAGE_DATA_KEY)
+    if image is not None:
+        image = save_image(image)
+
     recipe = Recipe.objects.create(title=recipe_title,
+                                   image=image,
                                    servings=recipe_servings,
                                    preparation_time_text=prep_time,
                                    preparation_time=prep_time,
@@ -186,9 +193,6 @@ def save_recipe(recipe_dict: dict):
     if chefs is not None:
         save_chefs(chefs, recipe)
 
-    image = recipe_dict.get(_IMAGE_DATA_KEY)
-    if image is not None:
-        save_image(image, recipe)
 
     recipe.save()
 

@@ -18,6 +18,14 @@ class Ingredient(models.Model):
         return f'Ingredient nr {self.id}, {self.name}'
 
 
+class Image(models.Model):
+    description = models.CharField(max_length=1000)
+    url = models.CharField(max_length=500)
+
+    def __str__(self):
+        return f'Image nr {self.id}, {self.url}'
+
+
 class Recipe(models.Model):
     """
     time is stored in minutes
@@ -25,6 +33,8 @@ class Recipe(models.Model):
     title = models.CharField(max_length=300)
     servings = models.CharField(max_length=100, null=True)
     url = models.CharField(max_length=500)
+
+    image = models.OneToOneField(Image, null=True)
 
     preparation_time = models.IntegerField(null=True)
     cooking_time = models.IntegerField(null=True)
@@ -58,14 +68,6 @@ class MealIngredient(models.Model):
     def __str__(self):
         return f'Meal ingredient nr {self.id}, {self.ingredient_and_amount_text}'
 
-
-class Image(models.Model):
-    description = models.CharField(max_length=1000)
-    url = models.CharField(max_length=500)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'Image nr {self.id}, {self.url}'
 
 
 class RecipesUser(models.Model):
