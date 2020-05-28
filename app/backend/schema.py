@@ -173,28 +173,21 @@ class Query(object):
                            id=graphene.Int(), )
 
     @staticmethod
-    def __resolve_query(self, queryset, search, first, skip):
-        if search:
-            _filter = (
-                    Q(url__icontains=search) |
-                    Q(description__icontains=search)
-            )
-            queryset = queryset.filter(_filter)
-
+    def __paginate_query(self, queryset, first, skip):
         if skip:
-            qs = queryset[skip:]
+            queryset = queryset[skip:]
 
         if first:
-            qs = queryset[:first]
+            queryset = queryset[:first]
 
-        return qs
-
-
+        return queryset
 
     def resolve_all_ingredients(self, info, search=None, first=None, skip=None, **kwargs):
-        qs = Ingredient.objects.all()
-        return self.__resolve_query(qs, search, first, skip)
+        qs = Ingredient.objects.filter(name__icontains=search)
+        if search is not None:
+            qs = qs.all()
 
+        return self.__paginate_query(qs, first, skip)
 
     def resolve_ingredient(self, info, **kwargs):
         id = kwargs.get('id')
@@ -210,7 +203,10 @@ class Query(object):
 
     def resolve_all_recipes(self, info, search=None, first=None, skip=None, **kwargs):
         qs = Recipe.objects.all()
-        return self.__resolve_query(qs, search, first, skip)
+        if search is not None:
+            qs = qs.filter(title__icontains=search)
+
+        return self.__paginate_query(qs, first, skip)
 
     def resolve_recipe(self, info, **kwargs):
         id = kwargs.get('id')
@@ -226,7 +222,10 @@ class Query(object):
 
     def resolve_all_chefs(self, info, search=None, first=None, skip=None, **kwargs):
         qs = Chef.objects.all()
-        return self.__resolve_query(qs, search, first, skip)
+        if search is not None:
+            qs = qs.filter(name__icontains=search)
+
+        return self.__paginate_query(qs, first, skip)
 
     def resolve_chef(self, info, **kwargs):
         id = kwargs.get('id')
@@ -242,7 +241,11 @@ class Query(object):
 
     def resolve_all_ingredients_segements(self, info, search=None, first=None, skip=None, **kwargs):
         qs = IngredientsSegment.objects.select_related('recipe').all()
-        return self.__resolve_query(qs, search, first, skip)
+
+        if search is not None:
+            qs = qs.filter(title__icontains=search)
+
+        return self.__paginate_query(qs, first, skip)
 
     def resolve_ingredients_segemnt(self, info, **kwargs):
         id = kwargs.get('id')
@@ -252,9 +255,10 @@ class Query(object):
 
         return None
 
-    def resolve_all_meal_ingredients(self, info, search=None, first=None, skip=None, **kwargs):
+    def resolve_all_meal_ingredients(self, info, first=None, skip=None, **kwargs):
         qs = MealIngredient.objects.select_related('ingredient_segment').all()
-        return self.__resolve_query(qs, search, first, skip)
+
+        return self.__paginate_query(qs, first, skip)
 
     def resolve_meal_ingredient(self, info, **kwargs):
         id = kwargs.get('id')
@@ -266,7 +270,10 @@ class Query(object):
 
     def resolve_all_images(self, info, search=None, first=None, skip=None, **kwargs):
         qs = Image.objects.all()
-        return self.__resolve_query(qs, search, first, skip)
+        if search is not None:
+            qs = qs.filter(description__icontains=search)
+
+        return self.__paginate_query(qs, first, skip)
 
     def resolve_image(self, info, **kwargs):
         id = kwargs.get('id')
@@ -275,4 +282,3 @@ class Query(object):
             return Image.objects.get(pk=id)
 
         return None
-

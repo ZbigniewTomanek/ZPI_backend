@@ -34,7 +34,7 @@ class Recipe(models.Model):
     servings = models.CharField(max_length=100, null=True)
     url = models.CharField(max_length=500)
 
-    image = models.OneToOneField(Image, null=True)
+    image = models.OneToOneField(Image, null=True, on_delete=models.CASCADE)
 
     preparation_time = models.IntegerField(null=True)
     cooking_time = models.IntegerField(null=True)
@@ -50,7 +50,7 @@ class Recipe(models.Model):
     added_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'Recipe nr {self.id}, {self.url}'
+        return f'Recipe nr {self.id}, {self.title}'
 
 
 class IngredientsSegment(models.Model):
@@ -67,7 +67,6 @@ class MealIngredient(models.Model):
 
     def __str__(self):
         return f'Meal ingredient nr {self.id}, {self.ingredient_and_amount_text}'
-
 
 
 class RecipesUser(models.Model):
