@@ -145,49 +145,82 @@ class Mutation(graphene.ObjectType):
     remove_user_recipe = RemoveUserRecipe.Field()
 
 
+def _paginate_query(queryset, first, skip):
+    if skip:
+        queryset = queryset[skip:]
+
+    if first:
+        queryset = queryset[:first]
+
+    return queryset
+
+
 class Query(object):
-    all_ingredients = graphene.List(IngredientType)
+    all_ingredients = graphene.List(IngredientType,
+                                    search=graphene.String(),
+                                    first=graphene.Int(),
+                                    skip=graphene.Int(),
+                                    )
     ingredient = graphene.Field(IngredientType,
                                 id=graphene.Int(),
-                                name=graphene.String())
+                                name=graphene.String(),
+                                )
 
-    all_recipes = graphene.List(RecipeType)
+    all_recipes = graphene.List(RecipeType,
+                                search=graphene.String(),
+                                first=graphene.Int(),
+                                skip=graphene.Int(),
+                                )
     recipe = graphene.Field(RecipeType,
                             id=graphene.Int())
 
-    all_chefs = graphene.List(ChefType)
+    all_chefs = graphene.List(ChefType,
+                              search=graphene.String(),
+                              first=graphene.Int(),
+                              skip=graphene.Int(),
+                              )
     chef = graphene.Field(ChefType,
                           id=graphene.Int(),
                           name=graphene.String())
 
-    all_ingredients_segments = graphene.List(IngredientsSegmentType)
+    all_ingredients_segments = graphene.List(IngredientsSegmentType,
+                                             search=graphene.String(),
+                                             first=graphene.Int(),
+                                             skip=graphene.Int(),
+                                             )
     ingredients_segment = graphene.Field(IngredientsSegmentType,
                                          id=graphene.Int(), )
 
-    all_meal_ingredients = graphene.List(MealIngredientType)
+    all_meal_ingredients = graphene.List(MealIngredientType,
+                                         search=graphene.String(),
+                                         first=graphene.Int(),
+                                         skip=graphene.Int(),
+                                         )
     meal_ingredient = graphene.Field(MealIngredientType,
                                      id=graphene.Int(), )
 
-    all_images = graphene.List(ImageType)
+    all_images = graphene.List(ImageType,
+                               search=graphene.String(),
+                               first=graphene.Int(),
+                               skip=graphene.Int(),
+                               )
     image = graphene.Field(ImageType,
                            id=graphene.Int(), )
 
-    @staticmethod
-    def __paginate_query(self, queryset, first, skip):
-        if skip:
-            queryset = queryset[skip:]
-
-        if first:
-            queryset = queryset[:first]
-
-        return queryset
+    all_users = graphene.List(UserType,
+                              search=graphene.String(),
+                              first=graphene.Int(),
+                              skip=graphene.Int(),
+                              )
+    user = graphene.Field(UserType,
+                          id=graphene.Int())
 
     def resolve_all_ingredients(self, info, search=None, first=None, skip=None, **kwargs):
         qs = Ingredient.objects.filter(name__icontains=search)
         if search is not None:
             qs = qs.all()
 
-        return self.__paginate_query(qs, first, skip)
+        return _paginate_query(qs, first, skip)
 
     def resolve_ingredient(self, info, **kwargs):
         id = kwargs.get('id')
@@ -206,7 +239,7 @@ class Query(object):
         if search is not None:
             qs = qs.filter(title__icontains=search)
 
-        return self.__paginate_query(qs, first, skip)
+        return _paginate_query(qs, first, skip)
 
     def resolve_recipe(self, info, **kwargs):
         id = kwargs.get('id')
@@ -225,7 +258,7 @@ class Query(object):
         if search is not None:
             qs = qs.filter(name__icontains=search)
 
-        return self.__paginate_query(qs, first, skip)
+        return _paginate_query(qs, first, skip)
 
     def resolve_chef(self, info, **kwargs):
         id = kwargs.get('id')
@@ -245,7 +278,7 @@ class Query(object):
         if search is not None:
             qs = qs.filter(title__icontains=search)
 
-        return self.__paginate_query(qs, first, skip)
+        return _paginate_query(qs, first, skip)
 
     def resolve_ingredients_segemnt(self, info, **kwargs):
         id = kwargs.get('id')
@@ -258,7 +291,7 @@ class Query(object):
     def resolve_all_meal_ingredients(self, info, first=None, skip=None, **kwargs):
         qs = MealIngredient.objects.select_related('ingredient_segment').all()
 
-        return self.__paginate_query(qs, first, skip)
+        return _paginate_query(qs, first, skip)
 
     def resolve_meal_ingredient(self, info, **kwargs):
         id = kwargs.get('id')
@@ -273,12 +306,27 @@ class Query(object):
         if search is not None:
             qs = qs.filter(description__icontains=search)
 
-        return self.__paginate_query(qs, first, skip)
+        return _paginate_query(qs, first, skip)
 
     def resolve_image(self, info, **kwargs):
         id = kwargs.get('id')
 
         if id is not None:
             return Image.objects.get(pk=id)
+
+        return None
+
+    def resolve_all_users(self, info, search=None, first=None, skip=None, **kwargs):
+        qs = RecipesUser.objects.all()
+        if search is not None:
+            qs = qs.filter(description__icontains=search)
+
+        return _paginate_query(qs, first, skip)
+
+    def resolve_user(self, info, **kwargs):
+        id = kwargs.get('id')
+
+        if id is not None:
+            return RecipesUser.objects.get(pk=id)
 
         return None
