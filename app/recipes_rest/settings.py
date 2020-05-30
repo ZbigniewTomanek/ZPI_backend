@@ -166,5 +166,6 @@ JWT_AUTH = {
     'JWT_ALGORITHM': 'HS256',
     'JWT_ALLOW_REFRESH': True,
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'backend.views.jwt_response_payload_handler',
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=28),
 }

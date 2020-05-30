@@ -152,7 +152,7 @@ def save_image(image):
     img = Image.objects.create(url=url, description=description)
     img.save()
 
-    return image
+    return img
 
 
 def save_recipe(recipe_dict: dict):

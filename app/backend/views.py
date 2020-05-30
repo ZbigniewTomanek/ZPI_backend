@@ -31,5 +31,11 @@ def create_user(request):
     return Response(status=status.HTTP_201_CREATED)
 
 
+def jwt_response_payload_handler(token, user=None, request=None):
+    return {
+        'token': token,
+        'user': user.id
+    }
+
 
 
