@@ -117,7 +117,6 @@ def save_chefs(chefs, recipe):
             chef_o = Chef.objects.create(name=name, url=url)
             chef_o.save()
 
-        chef_o.recipe_set.add(recipe)
         recipe.chefs.add(chef_o)
 
 
@@ -143,7 +142,6 @@ def save_ingredients(recipe, ingredients):
             ingredient.save()
 
         recipe.ingredients.add(ingredient)
-        ingredient.recipe_set.add(recipe)
 
 
 def save_image(image):
