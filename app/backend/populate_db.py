@@ -106,14 +106,16 @@ def save_chefs(chefs, recipe):
         name = chef.get(_CHEF_NAME_KEY)
         url = chef.get(_CHEF_LINK_KEY)
 
-        if Chef.objects.filter(name=name).exists():
+        chef_qs = Chef.objects.filter(name=name)
+
+        if chef_qs.count() > 0:
             LOG.debug(f'{chef} is already in db')
-            return
+            chef_o = chef_qs[0]
         else:
             LOG.debug(f'Adding {chef} to db')
 
-        chef_o = Chef.objects.create(name=name, url=url)
-        chef_o.save()
+            chef_o = Chef.objects.create(name=name, url=url)
+            chef_o.save()
 
         chef_o.recipe_set.add(recipe)
         recipe.chefs.add(chef_o)
@@ -131,15 +133,14 @@ def save_ingredients(recipe, ingredients):
     for ingredient_url in ingredients:
         ingredient_qs = Ingredient.objects.filter(url=ingredient_url)
 
-        if ingredient_qs.exists():
+        if ingredient_qs.count() > 0:
             LOG.debug(f'{ingredient_url} is already in database')
-            return
+            ingredient = ingredient_qs[0]
         else:
             LOG.debug(f'Putting {ingredient_url} to database')
-
-        name = extract_ingredient_name(ingredient_url)
-        ingredient = Ingredient.objects.create(url=ingredient_url, name=name)
-        ingredient.save()
+            name = extract_ingredient_name(ingredient_url)
+            ingredient = Ingredient.objects.create(url=ingredient_url, name=name)
+            ingredient.save()
 
         recipe.ingredients.add(ingredient)
         ingredient.recipe_set.add(recipe)
