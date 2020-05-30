@@ -2,7 +2,6 @@ import graphene
 from graphene_django import DjangoObjectType
 from .models import *
 from django.contrib.auth.models import User
-from django.db.models import Q
 
 
 class IngredientType(DjangoObjectType):
@@ -74,7 +73,7 @@ class AddLikedIngredient(graphene.Mutation):
 
     def mutate(self, info, user_id, ingredient_id):
         ingredient = Ingredient.objects.get(id=ingredient_id)
-        user = RecipesUser.objects.get(id=user_id)
+        user = RecipesUser.objects.get(user_id=user_id)
 
         user.liked_ingredients.add(ingredient)
 
@@ -92,7 +91,7 @@ class AddDislikedIngredient(graphene.Mutation):
 
     def mutate(self, info, user_id, ingredient_id):
         ingredient = Ingredient.objects.get(id=ingredient_id)
-        user = RecipesUser.objects.get(id=user_id)
+        user = RecipesUser.objects.get(user_id=user_id)
 
         user.disliked_ingredients.add(ingredient)
 
@@ -109,7 +108,7 @@ class SaveUserRecipe(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, user_id, recipe_id):
-        user = RecipesUser.objects.get(id=user_id)
+        user = RecipesUser.objects.get(user_id=user_id)
         recipe = Recipe.objects.get(id=recipe_id)
 
         user.saved_recipes.add(recipe)
@@ -127,7 +126,7 @@ class RemoveUserRecipe(graphene.Mutation):
     ok = graphene.Boolean()
 
     def mutate(self, info, user_id, recipe_id):
-        user = RecipesUser.objects.get(id=user_id)
+        user = RecipesUser.objects.get(user_id=user_id)
         recipe = Recipe.objects.get(id=recipe_id)
 
         user.saved_recipes.remove(recipe)
@@ -216,9 +215,9 @@ class Query(object):
                           id=graphene.Int())
 
     def resolve_all_ingredients(self, info, search=None, first=None, skip=None, **kwargs):
-        qs = Ingredient.objects.filter(name__icontains=search)
+        qs = Ingredient.objects.all()
         if search is not None:
-            qs = qs.all()
+            qs = qs.filter(name__icontains=search)
 
         return _paginate_query(qs, first, skip)
 
