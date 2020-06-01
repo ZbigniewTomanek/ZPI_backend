@@ -12,6 +12,7 @@ _RECIPE_URL_KEY = 'recipe_url'
 _RECIPE_DESCRIPTION_KEY = 'recipe_description'
 _RECIPE_TITLE_KEY = 'title'
 _RECIPE_SERVINGS_KEY = 'recipe_serving'
+_RECIPE_STEPS_KEY = 'recipe_method_data'
 
 _INGREDIENTS_SEGMENT_KEY = 'ingredient_segments'
 _INGREDIENTS_SEGMENT_TITLE_KEY = 'title'
@@ -154,6 +155,14 @@ def save_image(image):
     return img
 
 
+def save_prep_steps(steps, recipe):
+    for index, step_text in enumerate(steps):
+        PreparationStep.objects.create(
+            step_number=index+1,
+            recipe=recipe,
+            step_text=step_text).save()
+
+
 def save_recipe(recipe_dict: dict):
     prep_time_text = recipe_dict.get(_PREP_TIME_KEY)
     cook_time_text = recipe_dict.get(_COOK_TIME_KEY)
@@ -192,6 +201,9 @@ def save_recipe(recipe_dict: dict):
     if chefs is not None:
         save_chefs(chefs, recipe)
 
+    prep_steps = recipe_dict.get(_RECIPE_STEPS_KEY)
+    if prep_steps is not None:
+        save_prep_steps(prep_steps, recipe)
 
     recipe.save()
 

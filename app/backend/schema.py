@@ -253,10 +253,10 @@ class Query(object):
             qs = qs.filter(title__icontains=search)
 
         if liked_ingredients_ids is not None:
-            qs = qs.filter(ingredients__in=liked_ingredients_ids)
+            qs = qs.filter(ingredients__in=liked_ingredients_ids).distinct()
 
         if disliked_ingredients_ids is not None:
-            qs = qs.exclude(ingredients__in=disliked_ingredients_ids)
+            qs = qs.exclude(ingredients__in=disliked_ingredients_ids).distinct()
 
         return _paginate_query(qs, first, offset, skip)
 
@@ -346,6 +346,6 @@ class Query(object):
         id = kwargs.get('id')
 
         if id is not None:
-            return RecipesUser.objects.get(pk=id)
+            return RecipesUser.objects.get(user_id=id)
 
         return None

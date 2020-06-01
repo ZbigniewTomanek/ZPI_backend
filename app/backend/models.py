@@ -53,6 +53,12 @@ class Recipe(models.Model):
         return f'Recipe nr {self.id}, {self.title}'
 
 
+class PreparationStep(models.Model):
+    step_number = models.IntegerField(primary_key=True)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    step_text = models.CharField(max_length=1500)
+
+
 class IngredientsSegment(models.Model):
     title = models.CharField(max_length=4000)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
