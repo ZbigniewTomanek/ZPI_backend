@@ -113,6 +113,12 @@ def save_chefs(chefs, recipe):
             LOG.debug(f'{chef} is already in db')
             chef_o = chef_qs[0]
         else:
+            if name is None:
+                return
+
+            if url is None:
+                return
+
             LOG.debug(f'Adding {chef} to db')
 
             chef_o = Chef.objects.create(name=name, url=url)

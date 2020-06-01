@@ -54,7 +54,7 @@ class Recipe(models.Model):
 
 
 class PreparationStep(models.Model):
-    step_number = models.IntegerField(primary_key=True)
+    step_number = models.IntegerField()
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     step_text = models.CharField(max_length=1500)
 

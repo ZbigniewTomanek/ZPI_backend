@@ -39,6 +39,11 @@ class ClassicUserType(DjangoObjectType):
         model = User
 
 
+class PreparationStepType(DjangoObjectType):
+    class Meta:
+        model = PreparationStep
+
+
 class UserType(DjangoObjectType):
     user = graphene.Field(ClassicUserType)
 
@@ -149,7 +154,7 @@ def _paginate_query(queryset, first, offset, skip):
         queryset = queryset[skip:]
 
     if first and offset:
-        queryset = queryset[offset:offset+first]
+        queryset = queryset[offset:offset + first]
     else:
         if first:
             queryset = queryset[:first]
@@ -225,6 +230,15 @@ class Query(object):
                               )
     user = graphene.Field(UserType,
                           id=graphene.Int())
+
+    all_preparation_steps = graphene.List(PreparationStepType,
+                                          search=graphene.String(),
+                                          first=graphene.Int(),
+                                          skip=graphene.Int(),
+                                          offset=graphene.Int()
+                                          )
+    preparation_step = graphene.Field(PreparationStepType,
+                                      id=graphene.Int())
 
     def resolve_all_ingredients(self, info, search=None, first=None, skip=None, offset=None, **kwargs):
         qs = Ingredient.objects.all()
@@ -347,5 +361,20 @@ class Query(object):
 
         if id is not None:
             return RecipesUser.objects.get(user_id=id)
+
+        return None
+
+    def resolve_all_preparation_steps(self, info, search=None, first=None, skip=None, offset=None, **kwargs):
+        qs = PreparationStep.objects.all()
+        if search is not None:
+            qs = qs.filter(step_text__icontains=search)
+
+        return _paginate_query(qs, first, offset, skip)
+
+    def resolve_preparation_step(self, info, **kwargs):
+        id = kwargs.get('id')
+
+        if id is not None:
+            return PreparationStep.objects.get(user_id=id)
 
         return None
