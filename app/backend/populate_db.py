@@ -6,6 +6,7 @@ from tqdm import tqdm
 from django.contrib.auth.models import User
 import os
 
+_FILENAME = 'parsed_recipes.json'
 _PREP_TIME_KEY = 'prep_time'
 _COOK_TIME_KEY = 'cook_time'
 _RECIPE_URL_KEY = 'recipe_url'
@@ -246,7 +247,7 @@ def init_system():
         delete_all([Image, Chef, MealIngredient, IngredientsSegment, Ingredient, Recipe])
 
         LOG.info('Loading recipes from json')
-        data = load_json_data('parsed_recipes.json')
+        data = load_json_data(_FILENAME)
         save_recipes(data)
     else:
         LOG.info("recipes are already loaded")

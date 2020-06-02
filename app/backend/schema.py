@@ -87,6 +87,24 @@ class AddLikedIngredient(graphene.Mutation):
         return AddLikedIngredient(ok=ok)
 
 
+class RemoveLikedIngredient(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.Int()
+        ingredient_id = graphene.Int()
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, user_id, ingredient_id):
+        ingredient = Ingredient.objects.get(id=ingredient_id)
+        user = RecipesUser.objects.get(user_id=user_id)
+
+        user.liked_ingredients.remove(ingredient)
+
+        ok = True
+
+        return RemoveLikedIngredient(ok=ok)
+
+
 class AddDislikedIngredient(graphene.Mutation):
     class Arguments:
         user_id = graphene.Int()
@@ -103,6 +121,24 @@ class AddDislikedIngredient(graphene.Mutation):
         ok = True
 
         return AddDislikedIngredient(ok=ok)
+
+
+class RemoveDislikedIngredient(graphene.Mutation):
+    class Arguments:
+        user_id = graphene.Int()
+        ingredient_id = graphene.Int()
+
+    ok = graphene.Boolean()
+
+    def mutate(self, info, user_id, ingredient_id):
+        ingredient = Ingredient.objects.get(id=ingredient_id)
+        user = RecipesUser.objects.get(user_id=user_id)
+
+        user.disliked_ingredients.remove(ingredient)
+
+        ok = True
+
+        return RemoveDislikedIngredient(ok=ok)
 
 
 class SaveUserRecipe(graphene.Mutation):
@@ -144,7 +180,9 @@ class RemoveUserRecipe(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
     add_liked_ingredient = AddLikedIngredient.Field()
+    remove_liked_ingredient = RemoveLikedIngredient.Field()
     add_disliked_ingredient = AddDislikedIngredient.Field()
+    remove_disliked_ingredient = RemoveDislikedIngredient.Field()
     save_user_recipe = SaveUserRecipe.Field()
     remove_user_recipe = RemoveUserRecipe.Field()
 
